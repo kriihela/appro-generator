@@ -4,14 +4,17 @@ import { View, StyleSheet, Text, Image } from 'react-native';
 import { Input, Button } from 'react-native-elements';
 import { GOOGLE_API_KEY } from '@env';
 
-export default function Details() {
+export default function Details({ route, navigation }) {
 
     // Details for the search
     const [userLocation, setUserLocation] = useState('');
     const [numOfPlaces, setNumOfPlaces] = useState(3);
-    const [places, setPlaces] = useState([]);
     const [radius, setRadius] = useState(1000);
-
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(false);
+    
+    const [places, setPlaces] = useState([]);
+    
     // Details for the map
     const [region, setRegion] = useState({
         latitude: 60.1708,
@@ -20,36 +23,20 @@ export default function Details() {
         longitudeDelta: 0.0421,
     });
 
-    // Details for the loading screen
-    const [loading, setLoading] = useState(false);
-
-    // Details for the error screen
-    const [error, setError] = useState(false);
-
-    // Fetch nearest restaurants that sell alcohol from Google Places
+    // Fetch nearest bars
     const fetchPlaces = async () => {
         setLoading(true);
         setError(false);
         try {
-            const response = await fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${region.latitude},${region.longitude}&radius=${radius}&type=restaurant&keyword=alcohol&key=${GOOGLE_API_KEY}`);
+            const response = await fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${region.latitude},${region.longitude}&radius=${radius}&type=bar&keyword=alcohol&key=${GOOGLE_API_KEY}`);
             const json = await response.json();
             setPlaces(json.results);
-            console.log(filteredPlaces);
             setLoading(false);
         } catch (error) {
             setError(true);
             setLoading(false);
         }
     };
-
-    // filter the places to show only the ones that are open now and randomly select the value of numOfPlaces from the array
-    const filterPlaces = () => {
-        const openNow = places.filter(place => place.opening_hours.open_now === true);
-        const randomPlaces = openNow.sort(() => 0.5 - Math.random()).slice(0, numOfPlaces);
-        return randomPlaces;
-    };
-
-    const filteredPlaces = filterPlaces();
 
     // Get user location
     const getUserLocation = async () => {
@@ -80,6 +67,7 @@ export default function Details() {
 
     useEffect(() => {
         getUserLocation();
+        fetchPlaces();
     }, []);
 
     useEffect(() => {
@@ -92,7 +80,7 @@ export default function Details() {
             <Text style={styles.subtitle}>Appros whenever you want</Text>
             <Image style={styles.image} source={require('../assets/app-picture.png')} />
             <Input
-                placeholder='Address'
+                placeholder='Enter the address'
                 //label='Address'
                 clearButtonMode='always'
                 value={userLocation}
@@ -105,6 +93,7 @@ export default function Details() {
                 onPress={() => {
                     getUserLocation();
                     getAddress();
+                    fetchPlaces();
                 }}
             />
             <Input
@@ -113,20 +102,22 @@ export default function Details() {
                 value={radius}
                 clearButtonMode='always'
                 onChangeText={value => setRadius(value * 1000)}
-                keyboardType='numeric'
+                //keyboardType='phone-pad'
             />
             <Input
                 placeholder='Number of places'
                 //label='Number of places'
                 clearButtonMode='always'
                 onChangeText={value => setNumOfPlaces(value)}
-                keyboardType='numeric'
             />
             <Button
                 title='Search'
                 type='outline'
                 size='sm'
-                onPress={fetchPlaces}
+                onPress={() => {
+                    fetchPlaces();
+                    navigation.navigate('Results', {places: places, fetchPlaces: fetchPlaces, numOfPlaces: numOfPlaces });
+                }}
             />
         </View>
     );
