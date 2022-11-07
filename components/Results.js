@@ -8,10 +8,7 @@ import { Location } from 'expo-location';
 export default function Results({ route, navigation }) {
 
     const { places } = route.params;
-    const { fetchPlaces } = route.params;
     const { numOfPlaces } = route.params;
-
-    const [numOfPlacesToShow, setNumOfPlacesToShow] = useState(numOfPlaces);
 
     // return the names of the places in the list
     const renderItem = ({ item }) => (
@@ -22,11 +19,27 @@ export default function Results({ route, navigation }) {
 
     // filter places
     const filterPlaces = () => {
-        const randomPlaces = places.sort(() => 0.5 - Math.random()).slice(0, numOfPlacesToShow);
+        const randomPlaces = places.sort(() => 0.5 - Math.random()).slice(0, numOfPlaces);
         return randomPlaces;
     };
 
     const filteredPlaces = filterPlaces();
+
+    // if there are less places than the user wants, show a message
+    if (filteredPlaces.length < numOfPlaces) {
+        return (
+            <View style={styles.container}>
+                <Text style={styles.text}>Not enough places found.</Text>
+                <Text> </Text>
+                <Text style={styles.text}>In the settings, add more distance or reduce the number of places</Text>
+                <Text> </Text>
+                <Button
+                    title="Go back"
+                    onPress={() => navigation.navigate('Details')}
+                />
+            </View>
+        );
+    }
 
     return (
         <View style={styles.container}>
@@ -95,5 +108,10 @@ const styles = StyleSheet.create({
     },
     listItemText: {
         fontSize: 18,
+    },
+    text: {
+        fontSize: 18,
+        color: 'white',
+        textAlign: 'center',
     },
 });

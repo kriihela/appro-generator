@@ -1,6 +1,6 @@
 import * as Location from 'expo-location';
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, Image } from 'react-native';
+import { View, StyleSheet, Text, Image, Alert } from 'react-native';
 import { Input, Button } from 'react-native-elements';
 import { GOOGLE_API_KEY } from '@env';
 
@@ -8,13 +8,10 @@ export default function Details({ route, navigation }) {
 
     // Details for the search
     const [userLocation, setUserLocation] = useState('');
-    const [numOfPlaces, setNumOfPlaces] = useState(3);
-    const [radius, setRadius] = useState(1000);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(false);
-    
+    const [numOfPlaces, setNumOfPlaces] = useState(0);
+    const [radius, setRadius] = useState(0);
     const [places, setPlaces] = useState([]);
-    
+
     // Details for the map
     const [region, setRegion] = useState({
         latitude: 60.1708,
@@ -25,17 +22,14 @@ export default function Details({ route, navigation }) {
 
     // Fetch nearest bars
     const fetchPlaces = async () => {
-        setLoading(true);
-        setError(false);
-        try {
-            const response = await fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${region.latitude},${region.longitude}&radius=${radius}&type=bar&keyword=alcohol&key=${GOOGLE_API_KEY}`);
-            const json = await response.json();
-            setPlaces(json.results);
-            setLoading(false);
-        } catch (error) {
-            setError(true);
-            setLoading(false);
-        }
+        fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${region.latitude},${region.longitude}&radius=${radius}&type=bar&key=${GOOGLE_API_KEY}`)
+            .then((response) => response.json())
+            .then((json) => {
+                setPlaces(json.results);
+            })
+            .catch((error) => {
+                Alert.alert('Error', error);
+            });
     };
 
     // Get user location
@@ -45,10 +39,8 @@ export default function Details({ route, navigation }) {
             setErrorMsg('Permission to access location was denied');
             return;
         }
-
         let location = await Location.getCurrentPositionAsync({});
-        setUserLocation(location);
-        console.log('user location', userLocation);
+        console.log('user location: ', location);
         setRegion({
             latitude: location.coords.latitude,
             longitude: location.coords.longitude,
@@ -62,61 +54,103 @@ export default function Details({ route, navigation }) {
         const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${region.latitude},${region.longitude}&key=${GOOGLE_API_KEY}`);
         const json = await response.json();
         setUserLocation(json.results[0].formatted_address);
-        console.log('address', userLocation);
+        console.log('address', json.results[0].formatted_address);
+    };
+
+    // get coordinates from input
+    const getCoordinates = async () => {
+        const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${userLocation}&key=${GOOGLE_API_KEY}`);
+        const json = await response.json();
+        setRegion({
+            latitude: json.results[0].geometry.location.lat,
+            longitude: json.results[0].geometry.location.lng,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+        });
+        console.log('coordinates', json.results[0].geometry.location);
     };
 
     useEffect(() => {
         getUserLocation();
-        fetchPlaces();
     }, []);
-
     useEffect(() => {
         getAddress();
     }, [region]);
+    useEffect(() => {
+        fetchPlaces();
+    }, [region, radius]);
 
     return (
         <View style={styles.container}>
             <Text style={styles.title}>APPRO GENERATOR</Text>
             <Text style={styles.subtitle}>Appros whenever you want</Text>
             <Image style={styles.image} source={require('../assets/app-picture.png')} />
-            <Input
-                placeholder='Enter the address'
-                //label='Address'
-                clearButtonMode='always'
-                value={userLocation}
-                onChangeText={value => setUserLocation(value)}
-            />
-            <Button
-                size='sm'
-                title='Use current location'
-                type='outline'
-                onPress={() => {
-                    getUserLocation();
-                    getAddress();
-                    fetchPlaces();
-                }}
-            />
+            <View style={styles.inputContainer}>
+                <Input
+                    placeholder='Enter the address'
+                    inputStyle={{ color: 'white' }}
+                    keyboardAppearance='dark'
+                    value={userLocation}
+                    rightIcon={{
+                        type: 'material',
+                        name: 'clear',
+                        color: 'white',
+                        onPress: () => setUserLocation(''),
+                    }}
+                    onChangeText={value => setUserLocation(value)}
+                    onSubmitEditing={getCoordinates}
+                />
+                <Button
+                    icon={{
+                        name: 'location-on',
+                        type: 'material',
+                        color: 'white'
+
+                    }}
+                    type='clear'
+                    onPress={() => {
+                        getUserLocation();
+                        getAddress();
+                    }}
+                />
+            </View>
             <Input
                 placeholder='Enter radius in kilometers'
-                //label='Radius'
                 value={radius}
                 clearButtonMode='always'
+                keyboardType='phone-pad'
+                returnKeyType='done'
+                keyboardAppearance='dark'
+                inputStyle={{ color: 'white' }}
+                clearTextOnFocus={true}
                 onChangeText={value => setRadius(value * 1000)}
-                //keyboardType='phone-pad'
+                onSubmitEditing={fetchPlaces}
             />
             <Input
                 placeholder='Number of places'
-                //label='Number of places'
+                value={numOfPlaces}
                 clearButtonMode='always'
+                clearTextOnFocus={true}
+                keyboardType='phone-pad'
+                inputStyle={{ color: 'white' }}
+                keyboardAppearance='dark'
+                returnKeyType='done'
                 onChangeText={value => setNumOfPlaces(value)}
+                onSubmitEditing={fetchPlaces}
             />
             <Button
-                title='Search'
                 type='outline'
-                size='sm'
+                buttonStyle={{ borderColor: 'white', borderRadius: 10, width: 200 }}
+                titleStyle={{ color: 'white' }}
+                icon={{
+                    name: 'arrow-right',
+                    type: 'font-awesome',
+                    color: 'white'
+                }}
+                containerStyle={{ marginBottom: 30 }}
                 onPress={() => {
                     fetchPlaces();
-                    navigation.navigate('Results', {places: places, fetchPlaces: fetchPlaces, numOfPlaces: numOfPlaces });
+                    navigation.navigate('Results', { places: places, numOfPlaces: numOfPlaces });
                 }}
             />
         </View>
@@ -137,7 +171,7 @@ const styles = StyleSheet.create({
         height: '90%',
         marginBottom: 20,
         borderRadius: 20,
-        opacity: 0.7,
+        opacity: 0.9,
     },
     title: {
         fontSize: 20,
@@ -151,5 +185,11 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: 'gray',
         marginBottom: 10,
+    },
+    inputContainer: {
+        marginHorizontal: 20,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        flexWrap: 'nowrap',
     },
 });
