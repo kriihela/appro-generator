@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, FlatList, ActivityIndicator } from 'react-native';
-import { Input, Button } from 'react-native-elements';
+import { View, StyleSheet, Text, FlatList } from 'react-native';
+import { Input, Button, Icon, ListItem } from 'react-native-elements';
 import { GOOGLE_API_KEY } from '@env';
 import MapView, { Marker } from 'react-native-maps';
 import { Location } from 'expo-location';
@@ -9,13 +9,6 @@ export default function Results({ route, navigation }) {
 
     const { places } = route.params;
     const { numOfPlaces } = route.params;
-
-    // return the names of the places in the list
-    const renderItem = ({ item }) => (
-        <View style={styles.listItem}>
-            <Text style={styles.listItemText}>{item.name}</Text>
-        </View>
-    );
 
     // filter places
     const filterPlaces = () => {
@@ -65,13 +58,28 @@ export default function Results({ route, navigation }) {
                     />
                 ))}
             </MapView>
-            <View style={styles.list}>
-                <FlatList
-                    data={filteredPlaces}
-                    renderItem={renderItem}
-                    keyExtractor={item => item.id}
-                />
-            </View>
+            <FlatList
+                style={styles.list}
+                keyExtractor={item => item.id}
+                data={filteredPlaces}
+                renderItem={({ item }) =>
+                    <ListItem
+                        bottomDivider
+                        containerStyle={styles.listItem}
+                        onPress={() => navigation.navigate('Info', { item })}
+                    >
+                        <ListItem.Content>
+                            <ListItem.Title onPress={() => navigation.navigate('Info', { item: item })}>{item.name}</ListItem.Title>
+                        </ListItem.Content>
+                        <Button
+                            type="clear"
+                            icon={<Icon name="check" size={25} color="green" />}
+                            title="I'm here"
+                            onPress={() => console.log('delete')}
+                        />
+                    </ListItem>
+                }
+            />
         </View>
     );
 }
@@ -84,30 +92,26 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     list: {
-        flex: 1,
         width: '100%',
+        height: '5%',
         backgroundColor: 'black',
-        alignItems: 'center',
-        justifyContent: 'center',
     },
     map: {
         flex: 1,
         width: '100%',
-        backgroundColor: 'black',
-        alignItems: 'center',
-        justifyContent: 'center',
+        height: '100%',
         borderRadius: 20,
-        marginTop: 40,
+        marginTop: 35,
     },
     listItem: {
         padding: 10,
         marginVertical: 8,
-        marginHorizontal: 16,
-        backgroundColor: 'white',
         borderRadius: 10,
+        flexDirection: 'row',
     },
     listItemText: {
         fontSize: 18,
+
     },
     text: {
         fontSize: 18,
