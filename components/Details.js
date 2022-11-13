@@ -26,6 +26,7 @@ export default function Details({ route, navigation }) {
             .then((response) => response.json())
             .then((json) => {
                 setPlaces(json.results);
+                console.log(json.results);
             })
             .catch((error) => {
                 Alert.alert('Error', error);

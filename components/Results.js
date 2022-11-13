@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, FlatList } from 'react-native';
+import { View, StyleSheet, Text, FlatList, Modal, Image } from 'react-native';
 import { Input, Button, Icon, ListItem } from 'react-native-elements';
 import { GOOGLE_API_KEY } from '@env';
 import MapView, { Marker } from 'react-native-maps';
@@ -9,14 +9,27 @@ export default function Results({ route, navigation }) {
 
     const { places } = route.params;
     const { numOfPlaces } = route.params;
+    const [filteredPlaces, setFilteredPlaces] = useState([]);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [item, setItem] = useState({});
+    const showModal = (item) => {
+        setItem(item);
+        setModalVisible(true);
+    }
 
-    // filter places
-    const filterPlaces = () => {
-        const randomPlaces = places.sort(() => 0.5 - Math.random()).slice(0, numOfPlaces);
-        return randomPlaces;
-    };
-
-    const filteredPlaces = filterPlaces();
+    // filter the places randomly to show only the number of places the user wants to see
+    useEffect(() => {
+        const filterPlaces = () => {
+            let filteredPlaces = [];
+            for (let i = 0; i < numOfPlaces; i++) {
+                let randomIndex = Math.floor(Math.random() * places.length);
+                filteredPlaces.push(places[randomIndex]);
+                places.splice(randomIndex, 1);
+            }
+            setFilteredPlaces(filteredPlaces);
+        }
+        filterPlaces();
+    }, []);
 
     // if there are less places than the user wants, show a message
     if (filteredPlaces.length < numOfPlaces) {
@@ -66,20 +79,42 @@ export default function Results({ route, navigation }) {
                     <ListItem
                         bottomDivider
                         containerStyle={styles.listItem}
-                        onPress={() => navigation.navigate('Info', { item })}
+                        onPress={() => showModal(item)}
                     >
                         <ListItem.Content>
-                            <ListItem.Title onPress={() => navigation.navigate('Info', { item: item })}>{item.name}</ListItem.Title>
+                            <Text>{item.name}</Text>
                         </ListItem.Content>
                         <Button
                             type="clear"
                             icon={<Icon name="check" size={25} color="green" />}
-                            title="I'm here"
-                            onPress={() => console.log('delete')}
+                            title=" I'm here"
+                            onPress={() => console.log('I\'m here')}
                         />
                     </ListItem>
                 }
             />
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    setModalVisible(!modalVisible);
+                }}
+            >
+                    <View style={styles.modalView}>
+                        {item.photos && <Image
+                            style={styles.image}
+                            source={{ uri: `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${item.photos[0].photo_reference}&key=${GOOGLE_API_KEY}` }}
+                        />}
+                        <Text style={styles.modalText}>{item.name}</Text>
+                        <Text style={styles.modalText}>{item.vicinity}</Text>
+                        <Text style={styles.modalText}>Rating: {item.rating}</Text>
+                        <Button
+                            title="Close"
+                            onPress={() => setModalVisible(!modalVisible)}
+                        />
+                    </View>
+            </Modal>
         </View>
     );
 }
@@ -117,5 +152,22 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: 'white',
         textAlign: 'center',
+    },
+    modalView: {
+        marginTop: 20,
+        backgroundColor: "black",
+        padding: 22,
+        alignItems: "center",
+    },
+    modalText: {
+        marginBottom: 15,
+        color: 'white',
+        textAlign: "center"
+    },
+    image: {
+        width: 300,
+        height: 300,
+        marginBottom: 15,
+        borderRadius: 20,
     },
 });
