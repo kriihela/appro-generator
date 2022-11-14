@@ -26,7 +26,6 @@ export default function Details({ route, navigation }) {
             .then((response) => response.json())
             .then((json) => {
                 setPlaces(json.results);
-                console.log(json.results);
             })
             .catch((error) => {
                 Alert.alert('Error', error);
@@ -55,7 +54,6 @@ export default function Details({ route, navigation }) {
         const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${region.latitude},${region.longitude}&key=${GOOGLE_API_KEY}`);
         const json = await response.json();
         setUserLocation(json.results[0].formatted_address);
-        console.log('address', json.results[0].formatted_address);
     };
 
     // get coordinates from input
@@ -68,19 +66,20 @@ export default function Details({ route, navigation }) {
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421,
         });
-        console.log('coordinates', json.results[0].geometry.location);
     };
 
     useEffect(() => {
         getUserLocation();
     }, []);
+    /*
     useEffect(() => {
         getAddress();
     }, [region]);
+    
     useEffect(() => {
         fetchPlaces();
     }, [region, radius]);
-
+    */
     return (
         <View style={styles.container}>
             <Text style={styles.title}>APPRO GENERATOR</Text>
