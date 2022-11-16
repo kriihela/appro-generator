@@ -9,7 +9,7 @@ export default function Results({ route, navigation }) {
 
     const { places } = route.params;
     const { numOfPlaces } = route.params;
-    //const [placesLeft, setPlacesLeft] = useState(numOfPlaces);
+    const [placesLeft, setPlacesLeft] = useState(numOfPlaces);
     const [filteredPlaces, setFilteredPlaces] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [item, setItem] = useState({});
@@ -30,113 +30,129 @@ export default function Results({ route, navigation }) {
             setFilteredPlaces(filteredPlaces);
         }
         filterPlaces();
-
-        // if there are less places than the user wants, show a message
-        if (filteredPlaces.length < numOfPlaces) {
-            return (
-                <View style={styles.container}>
-                    <Text style={styles.text}>Not enough places found.</Text>
-                    <Text> </Text>
-                    <Text style={styles.text}>In the settings, add more distance or reduce the number of places</Text>
-                    <Text> </Text>
-                    <Button
-                        title="Go back"
-                        onPress={() => navigation.navigate('Details')}
-                    />
-                </View>
-            );
-        }
     }, []);
 
-// when user clicks delete button, remove the place from the list and update the number of places left
-const deletePlace = (item) => {
-    setFilteredPlaces(filteredPlaces.filter(place => place.place_id !== item.place_id));
-    //setPlacesLeft(placesLeft - 1);
-    //numOfPlaces - 1;
-}
+    // delete a place from the list
+    const deletePlace = (item) => {
+        setFilteredPlaces(filteredPlaces.filter(place => place.place_id !== item.place_id));
+        setPlacesLeft(placesLeft - 1);
+    }
 
-// when every place is deleted, show a message
-if (filteredPlaces.length === 0) {
-    return (
-        <View style={styles.container}>
-            <Text style={styles.text}>No more places left.</Text>
-            <Text> </Text>
-            <Button title="Go back" onPress={() => navigation.navigate('Details')} />
-        </View>
-    );
-}
-
-return (
-    <View style={styles.container}>
-        <MapView
-            style={styles.map}
-            showsUserLocation={true}
-            region={{
-                latitude: 60.1708,
-                longitude: 24.9375,
-                latitudeDelta: 0.0922,
-                longitudeDelta: 0.0421,
-            }}
-        >
-            {filteredPlaces.map((place, index) => (
-                <Marker
-                    key={index}
-                    coordinate={{
-                        latitude: place.geometry.location.lat,
-                        longitude: place.geometry.location.lng,
-                    }}
-                    title={place.name}
-                    description={place.vicinity}
-                />
-            ))}
-        </MapView>
-        <FlatList
-            style={styles.list}
-            keyExtractor={item => item.id}
-            data={filteredPlaces}
-            renderItem={({ item }) =>
-                <ListItem
-                    bottomDivider
-                    containerStyle={styles.listItem}
-                    onPress={() => showModal(item)}
-                >
-                    <ListItem.Content>
-                        <Text>{item.name}</Text>
-                    </ListItem.Content>
-                    <Button
-                        type="clear"
-                        icon={<Icon name="check" size={25} color="green" />}
-                        title=" I'm here"
-                        onPress={() => deletePlace(item)}
-                    />
-                </ListItem>
-            }
-        />
-        <Modal
-            animationType="slide"
-            transparent={true}
-            visible={modalVisible}
-            onRequestClose={() => {
-                setModalVisible(!modalVisible);
-            }}
-        >
-            <View style={styles.modalView}>
-                {item.photos && <Image
-                    style={styles.image}
-                    source={{ uri: `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${item.photos[0].photo_reference}&key=${GOOGLE_API_KEY}` }}
-                />}
-                <Text style={styles.modalText}>{item.name}</Text>
-                <Text style={styles.modalText}>{item.vicinity}</Text>
-                <Text style={styles.modalText}>Rating: {item.rating}</Text>
+    // when every place is deleted, show a message
+    // if there are less places than the user wants, show a message
+    if (filteredPlaces.length === 0) {
+        return (
+            <View style={styles.container}>
+                <Text style={styles.header}>Congratulations!</Text>
+                <Text> </Text>
+                <Text style={styles.text}>You've visited every place!</Text>
+                <Text style={styles.text}>Remember to eat and drink water!</Text>
+                <Text> </Text>
+                <Button title="Go back" onPress={() => navigation.navigate('Details')} />
+            </View>
+        );
+    } else if (filteredPlaces.length < placesLeft) {
+        return (
+            <View style={styles.container}>
+                <Text style={styles.text}>Not enough places found.</Text>
+                <Text> </Text>
+                <Text style={styles.text}>In the settings, add more distance or reduce the number of places</Text>
+                <Text> </Text>
                 <Button
-                    title="Close"
-                    onPress={() => setModalVisible(!modalVisible)}
+                    title="Go back"
+                    onPress={() => navigation.navigate('Details')}
                 />
             </View>
-        </Modal>
-    </View>
-);
+        );
+        /*
+    } else if (places === []) {
+        return (
+            <View style={styles.container}>
+                <Text style={styles.text}>No places found.</Text>
+                <Text> </Text>
+                <Text style={styles.text}>In the settings, add more distance or reduce the number of places</Text>
+                <Text> </Text>
+                <Button
+                    title="Go back"
+                    onPress={() => navigation.navigate('Details')}
+                />
+            </View>
+        );
+        */
+    } else {
+        return (
+            <View style={styles.container}>
+                <MapView
+                    style={styles.map}
+                    showsUserLocation={true}
+                    region={{
+                        latitude: 60.1708,
+                        longitude: 24.9375,
+                        latitudeDelta: 0.0922,
+                        longitudeDelta: 0.0421,
+                    }}
+                >
+                    {filteredPlaces.map((place, index) => (
+                        <Marker
+                            key={index}
+                            coordinate={{
+                                latitude: place.geometry.location.lat,
+                                longitude: place.geometry.location.lng,
+                            }}
+                            title={place.name}
+                            description={place.vicinity}
+                        />
+                    ))}
+                </MapView>
+                <FlatList
+                    style={styles.list}
+                    keyExtractor={item => item.id}
+                    data={filteredPlaces}
+                    renderItem={({ item }) =>
+                        <ListItem
+                            bottomDivider
+                            containerStyle={styles.listItem}
+                            onPress={() => showModal(item)}
+                        >
+                            <ListItem.Content>
+                                <Text>{item.name}</Text>
+                            </ListItem.Content>
+                            <Button
+                                type="clear"
+                                icon={<Icon name="check" size={25} color="green" />}
+                                title=" I'm here"
+                                onPress={() => deletePlace(item)}
+                            />
+                        </ListItem>
+                    }
+                />
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisible}
+                    onRequestClose={() => {
+                        setModalVisible(!modalVisible);
+                    }}
+                >
+                    <View style={styles.modalView}>
+                        {item.photos && <Image
+                            style={styles.image}
+                            source={{ uri: `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${item.photos[0].photo_reference}&key=${GOOGLE_API_KEY}` }}
+                        />}
+                        <Text style={styles.modalText}>{item.name}</Text>
+                        <Text style={styles.modalText}>{item.vicinity}</Text>
+                        <Text style={styles.modalText}>Rating: {item.rating}</Text>
+                        <Button
+                            title="Close"
+                            onPress={() => setModalVisible(!modalVisible)}
+                        />
+                    </View>
+                </Modal>
+            </View>
+        );
+    }
 }
+
 
 const styles = StyleSheet.create({
     container: {
@@ -188,5 +204,10 @@ const styles = StyleSheet.create({
         height: 300,
         marginBottom: 15,
         borderRadius: 20,
+    },
+    header: {
+        fontSize: 30,
+        color: 'white',
+        textAlign: 'center',
     },
 });

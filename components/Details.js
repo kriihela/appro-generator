@@ -1,7 +1,7 @@
 import * as Location from 'expo-location';
 import { useEffect, useState } from 'react';
 import { View, StyleSheet, Text, Image, Alert } from 'react-native';
-import { Input, Button } from 'react-native-elements';
+import { Input, Button, Slider } from 'react-native-elements';
 import { GOOGLE_API_KEY } from '@env';
 
 export default function Details({ route, navigation }) {
@@ -9,7 +9,7 @@ export default function Details({ route, navigation }) {
     // Details for the search
     const [userLocation, setUserLocation] = useState('');
     const [numOfPlaces, setNumOfPlaces] = useState(0);
-    const [radius, setRadius] = useState(0);
+    const [radius, setRadius] = useState(1);
     const [places, setPlaces] = useState([]);
 
     // Details for the map
@@ -114,6 +114,38 @@ export default function Details({ route, navigation }) {
                     }}
                 />
             </View>
+            {/*
+            <Slider
+                value={radius}
+                onValueChange={value => setRadius(value)}
+                minimumValue={1}
+                maximumValue={20}
+                step={1}
+                thumbTintColor='white'
+                minimumTrackTintColor='white'
+                maximumTrackTintColor='grey'
+                style={{ width: 300, height: 40, margin: 10, }}
+                onSubmitEditing={() => {
+                    setRadius(radius * 1000)
+                    fetchPlaces()
+                }
+                }
+            />
+            <Text style={styles.sliderText}>Radius: {radius} km</Text>
+            <Slider
+                value={numOfPlaces}
+                onValueChange={value => setNumOfPlaces(value)}
+                minimumValue={1}
+                maximumValue={50}
+                step={1}
+                thumbTintColor='white'
+                minimumTrackTintColor='red'
+                maximumTrackTintColor='green'
+                style={{ width: 300, height: 40, margin: 10, }}
+                onSubmitEditing={fetchPlaces}
+            />
+            <Text style={styles.sliderText}>Number of places: {numOfPlaces}</Text>
+            {*/}
             <Input
                 placeholder='Enter radius in kilometers'
                 value={radius}
@@ -191,5 +223,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         flexWrap: 'nowrap',
+    },
+    sliderText: {
+        color: 'white',
+        fontSize: 10,
+        marginBottom: 10,
     },
 });
