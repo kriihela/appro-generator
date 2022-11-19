@@ -9,6 +9,7 @@ export default function Results({ route, navigation }) {
 
     const { places } = route.params;
     const { numOfPlaces } = route.params;
+    const [placesNumber, setPlacesNumber] = useState(places.length);
     const [placesLeft, setPlacesLeft] = useState(numOfPlaces);
     const [filteredPlaces, setFilteredPlaces] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
@@ -38,47 +39,50 @@ export default function Results({ route, navigation }) {
         setPlacesLeft(placesLeft - 1);
     }
 
-    // when every place is deleted, show a message
     // if there are less places than the user wants, show a message
-    if (filteredPlaces.length === 0) {
+    if (placesNumber < placesLeft) {
+        return (
+            <View style={styles.container}>
+                <Text style={styles.header}>Not enough places found.</Text>
+                <Text> </Text>
+                <Image source={require('../assets/no-places.png')} style={styles.image} />
+                <Text> </Text>
+                <Text style={styles.text}>In the settings, add more distance or reduce the number of places</Text>
+                <Text> </Text>
+                <Button
+                    title="Go back"
+                    buttonStyle={{ backgroundColor: 'black' }}
+                    titleStyle={{ color: 'red' }}
+                    type="outline"
+                    containerStyle={{ borderColor: 'white', borderWidth: 1 }}
+                    icon={<Icon name="arrow-back" color="white" />}
+                    onPress={() => navigation.navigate('Details')}
+                />
+            </View>
+        );
+
+    // when every place is deleted, show a message
+    } else if (placesLeft === 0) {
         return (
             <View style={styles.container}>
                 <Text style={styles.header}>Congratulations!</Text>
                 <Text> </Text>
+                <Image source={require('../assets/Celebration.png')} style={styles.image} />
                 <Text style={styles.text}>You've visited every place!</Text>
                 <Text style={styles.text}>Remember to eat and drink water!</Text>
                 <Text> </Text>
-                <Button title="Go back" onPress={() => navigation.navigate('Details')} />
-            </View>
-        );
-    } else if (filteredPlaces.length < placesLeft) {
-        return (
-            <View style={styles.container}>
-                <Text style={styles.text}>Not enough places found.</Text>
-                <Text> </Text>
-                <Text style={styles.text}>In the settings, add more distance or reduce the number of places</Text>
-                <Text> </Text>
                 <Button
                     title="Go back"
-                    onPress={() => navigation.navigate('Details')}
-                />
+                    buttonStyle={{ backgroundColor: 'black' }}
+                    titleStyle={{ color: 'green' }}
+                    type="outline"
+                    containerStyle={{ borderColor: 'white', borderWidth: 1 }}
+                    // check icon
+                    icon={<Icon name="arrow-back" color="white" />}
+                    onPress={() => navigation.navigate('Details')} />
             </View>
         );
-        /*
-    } else if (places === []) {
-        return (
-            <View style={styles.container}>
-                <Text style={styles.text}>No places found.</Text>
-                <Text> </Text>
-                <Text style={styles.text}>In the settings, add more distance or reduce the number of places</Text>
-                <Text> </Text>
-                <Button
-                    title="Go back"
-                    onPress={() => navigation.navigate('Details')}
-                />
-            </View>
-        );
-        */
+
     } else {
         return (
             <View style={styles.container}>
@@ -153,7 +157,6 @@ export default function Results({ route, navigation }) {
     }
 }
 
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -200,8 +203,8 @@ const styles = StyleSheet.create({
         textAlign: "center"
     },
     image: {
-        width: 300,
-        height: 300,
+        width: 400,
+        height: 400,
         marginBottom: 15,
         borderRadius: 20,
     },
