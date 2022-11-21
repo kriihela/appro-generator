@@ -1,14 +1,14 @@
 import * as Location from 'expo-location';
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, Image, Alert } from 'react-native';
-import { Input, Button, Slider } from 'react-native-elements';
+import { View, StyleSheet, Text, Image, Alert, KeyboardAvoidingView } from 'react-native';
+import { Input, Button, Header } from 'react-native-elements';
 import { GOOGLE_API_KEY } from '@env';
 
 export default function Details({ route, navigation }) {
 
     // Details for the search
     const [userLocation, setUserLocation] = useState('');
-    const [numOfPlaces, setNumOfPlaces] = useState(0);
+    const [numOfPlaces, setNumOfPlaces] = useState(1);
     const [radius, setRadius] = useState(1);
     const [places, setPlaces] = useState([]);
 
@@ -80,10 +80,16 @@ export default function Details({ route, navigation }) {
         fetchPlaces();
     }, [region, radius]);
     */
+
     return (
+
         <View style={styles.container}>
-            <Text style={styles.title}>APPRO GENERATOR</Text>
-            <Text style={styles.subtitle}>Appros whenever you want</Text>
+            <Header
+                containerStyle={{ borderBottomColor: 'black', backgroundColor: 'black' }}
+                rightComponent={{ icon: 'favorite', color: '#fff', onPress: () => navigation.openDrawer() }}
+                leftComponent={{ icon: 'info', color: '#fff', onPress: () => navigation.openDrawer() }}
+                centerComponent={{ text: 'APPRO GENERATOR', style: { color: '#fff' } }}
+            />
             <Image style={styles.image} source={require('../assets/app-picture.png')} />
             <View style={styles.inputContainer}>
                 <Input
@@ -98,7 +104,10 @@ export default function Details({ route, navigation }) {
                         onPress: () => setUserLocation(''),
                     }}
                     onChangeText={value => setUserLocation(value)}
-                    onSubmitEditing={getCoordinates}
+                    onSubmitEditing={() => {
+                        getCoordinates();
+                        fetchPlaces();
+                    }}
                 />
                 <Button
                     icon={{
@@ -114,62 +123,32 @@ export default function Details({ route, navigation }) {
                     }}
                 />
             </View>
-            {/*
-            <Slider
-                value={radius}
-                onValueChange={value => setRadius(value)}
-                minimumValue={1}
-                maximumValue={20}
-                step={1}
-                thumbTintColor='white'
-                minimumTrackTintColor='white'
-                maximumTrackTintColor='grey'
-                style={{ width: 300, height: 40, margin: 10, }}
-                onSubmitEditing={() => {
-                    setRadius(radius * 1000)
-                    fetchPlaces()
-                }
-                }
-            />
-            <Text style={styles.sliderText}>Radius: {radius} km</Text>
-            <Slider
-                value={numOfPlaces}
-                onValueChange={value => setNumOfPlaces(value)}
-                minimumValue={1}
-                maximumValue={50}
-                step={1}
-                thumbTintColor='white'
-                minimumTrackTintColor='red'
-                maximumTrackTintColor='green'
-                style={{ width: 300, height: 40, margin: 10, }}
-                onSubmitEditing={fetchPlaces}
-            />
-            <Text style={styles.sliderText}>Number of places: {numOfPlaces}</Text>
-            {*/}
-            <Input
-                placeholder='Enter radius in kilometers'
-                value={radius}
-                clearButtonMode='always'
-                keyboardType='phone-pad'
-                returnKeyType='done'
-                keyboardAppearance='dark'
-                inputStyle={{ color: 'white' }}
-                clearTextOnFocus={true}
-                onChangeText={value => setRadius(value * 1000)}
-                onSubmitEditing={fetchPlaces}
-            />
-            <Input
-                placeholder='Number of places'
-                value={numOfPlaces}
-                clearButtonMode='always'
-                clearTextOnFocus={true}
-                keyboardType='phone-pad'
-                inputStyle={{ color: 'white' }}
-                keyboardAppearance='dark'
-                returnKeyType='done'
-                onChangeText={value => setNumOfPlaces(value)}
-                onSubmitEditing={fetchPlaces}
-            />
+            <KeyboardAvoidingView style={styles.radiusAndPlacesContainer} behavior="padding" enabled>
+                <Input
+                    placeholder='Enter radius in kilometers'
+                    value={radius}
+                    clearButtonMode='always'
+                    keyboardType='number-pad'
+                    returnKeyType='done'
+                    keyboardAppearance='dark'
+                    inputStyle={{ color: 'white' }}
+                    clearTextOnFocus={true}
+                    onChangeText={value => setRadius(value * 1000)}
+                    onSubmitEditing={fetchPlaces}
+                />
+                <Input
+                    placeholder='Number of places'
+                    value={numOfPlaces}
+                    clearButtonMode='always'
+                    clearTextOnFocus={true}
+                    keyboardType='number-pad'
+                    inputStyle={{ color: 'white' }}
+                    keyboardAppearance='dark'
+                    returnKeyType='done'
+                    onChangeText={value => setNumOfPlaces(value)}
+                    onSubmitEditing={fetchPlaces}
+                />
+            </KeyboardAvoidingView>
             <Button
                 type='outline'
                 buttonStyle={{ borderColor: 'white', borderRadius: 10, width: 200 }}
@@ -197,13 +176,12 @@ const styles = StyleSheet.create({
     },
     image: {
         flex: 1,
-        resizeMode: 'cover',
-        justifyContent: 'center',
-        width: '90%',
-        height: '90%',
+        //resizeMode: 'cover',
+        //justifyContent: 'center',
+        width: '100%',
         marginBottom: 20,
         borderRadius: 20,
-        opacity: 0.9,
+        //opacity: 0.9,
     },
     title: {
         fontSize: 20,
@@ -223,6 +201,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         flexWrap: 'nowrap',
+    },
+    radiusAndPlacesContainer: {
+        flexDirection: 'row',
+        flexWrap: 'nowrap',
+        marginHorizontal: 100,
     },
     sliderText: {
         color: 'white',

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, FlatList, Modal, Image } from 'react-native';
-import { Input, Button, Icon, ListItem } from 'react-native-elements';
+import { Button, Icon, ListItem, Header } from 'react-native-elements';
 import { GOOGLE_API_KEY } from '@env';
 import MapView, { Marker } from 'react-native-maps';
-import { Location } from 'expo-location';
 
 export default function Results({ route, navigation }) {
 
@@ -85,7 +84,13 @@ export default function Results({ route, navigation }) {
 
     } else {
         return (
+
             <View style={styles.container}>
+                <Header
+                    containerStyle={{ backgroundColor: 'black', borderBottomColor: 'black' }}
+                    leftComponent={<Icon name="arrow-back" color="white" onPress={() => navigation.navigate('Details')} />}
+                    centerComponent={{ text: 'Appro route', style: { color: 'white', fontSize: 20 } }}
+                />
                 <MapView
                     style={styles.map}
                     showsUserLocation={true}
@@ -147,6 +152,7 @@ export default function Results({ route, navigation }) {
                         <Text style={styles.modalText}>{item.vicinity}</Text>
                         <Text style={styles.modalText}>Rating: {item.rating}</Text>
                         <Button
+                            buttonStyle={{ backgroundColor: 'black', borderColor: 'white', borderWidth: 1, borderRadius: 10 }}
                             title="Close"
                             onPress={() => setModalVisible(!modalVisible)}
                         />
@@ -174,7 +180,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         borderRadius: 20,
-        marginTop: 35,
+        marginTop: 10,
     },
     listItem: {
         padding: 10,
@@ -194,7 +200,7 @@ const styles = StyleSheet.create({
     modalView: {
         marginTop: 20,
         backgroundColor: "black",
-        padding: 22,
+        padding: 20,
         alignItems: "center",
     },
     modalText: {
