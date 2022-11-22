@@ -60,7 +60,7 @@ export default function Results({ route, navigation }) {
             </View>
         );
 
-    // when every place is deleted, show a message
+        // when every place is deleted, show a message
     } else if (placesLeft === 0) {
         return (
             <View style={styles.container}>
@@ -76,7 +76,6 @@ export default function Results({ route, navigation }) {
                     titleStyle={{ color: 'green' }}
                     type="outline"
                     containerStyle={{ borderColor: 'white', borderWidth: 1 }}
-                    // check icon
                     icon={<Icon name="arrow-back" color="white" />}
                     onPress={() => navigation.navigate('Details')} />
             </View>
@@ -190,7 +189,6 @@ const styles = StyleSheet.create({
     },
     listItemText: {
         fontSize: 18,
-
     },
     text: {
         fontSize: 18,

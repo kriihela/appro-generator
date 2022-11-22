@@ -87,7 +87,7 @@ export default function Details({ route, navigation }) {
             <Header
                 containerStyle={{ borderBottomColor: 'black', backgroundColor: 'black' }}
                 rightComponent={{ icon: 'favorite', color: '#fff', onPress: () => navigation.openDrawer() }}
-                leftComponent={{ icon: 'info', color: '#fff', onPress: () => navigation.openDrawer() }}
+                leftComponent={{ icon: 'info', color: '#fff', onPress: () => navigation.navigate('Info') }}
                 centerComponent={{ text: 'APPRO GENERATOR', style: { color: '#fff' } }}
             />
             <Image style={styles.image} source={require('../assets/app-picture.png')} />
@@ -176,12 +176,9 @@ const styles = StyleSheet.create({
     },
     image: {
         flex: 1,
-        //resizeMode: 'cover',
-        //justifyContent: 'center',
         width: '100%',
         marginBottom: 20,
         borderRadius: 20,
-        //opacity: 0.9,
     },
     title: {
         fontSize: 20,
