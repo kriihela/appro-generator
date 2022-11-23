@@ -18,7 +18,7 @@ export default function Results({ route, navigation }) {
         setModalVisible(true);
     }
 
-    // filter the places randomly to show only the number of places the user wants to see
+    // randomize the places and only show the number of places the user wants to see
     useEffect(() => {
         const filterPlaces = () => {
             let filteredPlaces = [];
@@ -60,7 +60,7 @@ export default function Results({ route, navigation }) {
             </View>
         );
 
-        // when every place is deleted, show a message
+    // when every place is deleted, show a message
     } else if (placesLeft === 0) {
         return (
             <View style={styles.container}>

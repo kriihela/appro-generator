@@ -22,15 +22,18 @@ export default function Details({ route, navigation }) {
 
     // Fetch nearest bars
     const fetchPlaces = async () => {
-        fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${region.latitude},${region.longitude}&radius=${radius}&type=bar&key=${GOOGLE_API_KEY}`)
-            .then((response) => response.json())
-            .then((json) => {
-                setPlaces(json.results);
-            })
-            .catch((error) => {
-                Alert.alert('Error', error);
-            });
-    };
+        const response = await fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${region.latitude},${region.longitude}&radius=${radius}&type=bar&key=${GOOGLE_API_KEY}`)
+        const data = await response.json();
+        const places = data.results;
+        return places;
+    }
+
+    // when user clicks the button, fetch places and set them to the state and navigate to the Results screen
+    const search = async () => {
+        const places = await fetchPlaces();
+        setPlaces(places);
+        navigation.navigate('Results', { places: places, numOfPlaces: numOfPlaces });
+    }
 
     // Get user location
     const getUserLocation = async () => {
@@ -71,15 +74,6 @@ export default function Details({ route, navigation }) {
     useEffect(() => {
         getUserLocation();
     }, []);
-    /*
-    useEffect(() => {
-        getAddress();
-    }, [region]);
-    
-    useEffect(() => {
-        fetchPlaces();
-    }, [region, radius]);
-    */
 
     return (
 
@@ -106,7 +100,6 @@ export default function Details({ route, navigation }) {
                     onChangeText={value => setUserLocation(value)}
                     onSubmitEditing={() => {
                         getCoordinates();
-                        fetchPlaces();
                     }}
                 />
                 <Button
@@ -118,6 +111,7 @@ export default function Details({ route, navigation }) {
                     }}
                     type='clear'
                     onPress={() => {
+                        setUserLocation('');
                         getUserLocation();
                         getAddress();
                     }}
@@ -134,7 +128,6 @@ export default function Details({ route, navigation }) {
                     inputStyle={{ color: 'white' }}
                     clearTextOnFocus={true}
                     onChangeText={value => setRadius(value * 1000)}
-                    onSubmitEditing={fetchPlaces}
                 />
                 <Input
                     placeholder='Number of places'
@@ -146,7 +139,6 @@ export default function Details({ route, navigation }) {
                     keyboardAppearance='dark'
                     returnKeyType='done'
                     onChangeText={value => setNumOfPlaces(value)}
-                    onSubmitEditing={fetchPlaces}
                 />
             </KeyboardAvoidingView>
             <Button
@@ -159,10 +151,7 @@ export default function Details({ route, navigation }) {
                     color: 'white'
                 }}
                 containerStyle={{ marginBottom: 30 }}
-                onPress={() => {
-                    fetchPlaces();
-                    navigation.navigate('Results', { places: places, numOfPlaces: numOfPlaces });
-                }}
+                onPress={search}
             />
         </View>
     );
