@@ -1,15 +1,5 @@
 <h1 align="center">Appro Generator</h1>
 
-<div align="center">
-  
-  [![Status](https://img.shields.io/badge/status-active-success.svg)]()
-  [![GitHub Issues](https://img.shields.io/github/issues/kriihela/appro-generator.svg)](https://www.github.com/kriihela/appro-generator/issues)
-  [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/kriihela/appro-generator.svg)](https://www.github.com/kriihela/appro-generator/pulls)
-
-</div>
-
----
-
 <p align="center"> The app to generate bar crawl events known as Appros <br>
 <b> Always new appros to experience! Drink responsibly! </b>
 </p>
@@ -95,9 +85,9 @@ Next, the user sees a map where the bars and the user's current location are mar
 
 ## Deployment <a name = "deployment"></a>
 
-If you want to deploy the app to your phone, you can use the Expo Go app. You can scan the QR code from the terminal or from the browser that opens when you run the app.
+If you want to deploy the app to your phone, you can use the Expo Go app. You can scan the QR code from the terminal when you write `npm start` or `npx expo start`.
 
-You can also use the Expo Go app to scan the QR code below.
+You can also use the Expo Go app to scan the QR code below to use the app without cloning the repository.
 
 <img width=200px height=200px src="https://qr.expo.dev/expo-go?owner=kriihela&slug=approgeneraattori&releaseChannel=default&host=exp.host" alt="QR code"></a>
 
