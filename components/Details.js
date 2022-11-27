@@ -1,7 +1,7 @@
 import * as Location from 'expo-location';
 import { useEffect, useState } from 'react';
 import { View, StyleSheet, Text, Image, Alert, KeyboardAvoidingView } from 'react-native';
-import { Input, Button, Header } from 'react-native-elements';
+import { Input, Button, Header, Slider } from 'react-native-elements';
 import { GOOGLE_API_KEY } from '@env';
 
 export default function Details({ route, navigation }) {
@@ -22,7 +22,7 @@ export default function Details({ route, navigation }) {
 
     // Fetch nearest bars
     const fetchPlaces = async () => {
-        const response = await fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${region.latitude},${region.longitude}&radius=${radius}&type=bar&key=${GOOGLE_API_KEY}`)
+        const response = await fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${region.latitude},${region.longitude}&radius=${radius * 1000}&type=bar&key=${GOOGLE_API_KEY}`)
         const data = await response.json();
         const places = data.results;
         return places;
@@ -80,8 +80,7 @@ export default function Details({ route, navigation }) {
         <View style={styles.container}>
             <Header
                 containerStyle={{ borderBottomColor: 'black', backgroundColor: 'black' }}
-                rightComponent={{ icon: 'favorite', color: '#fff', onPress: () => navigation.openDrawer() }}
-                leftComponent={{ icon: 'info', color: '#fff', onPress: () => navigation.navigate('Info') }}
+                rightComponent={{ icon: 'info', color: '#fff', onPress: () => navigation.navigate('Info') }}
                 centerComponent={{ text: 'APPRO GENERATOR', style: { color: '#fff' } }}
             />
             <Image style={styles.image} source={require('../assets/app-picture.png')} />
@@ -118,6 +117,7 @@ export default function Details({ route, navigation }) {
                 />
             </View>
             <KeyboardAvoidingView style={styles.radiusAndPlacesContainer} behavior="padding" enabled>
+                {/*}
                 <Input
                     placeholder='Enter radius in kilometers'
                     value={radius}
@@ -140,7 +140,32 @@ export default function Details({ route, navigation }) {
                     returnKeyType='done'
                     onChangeText={value => setNumOfPlaces(value)}
                 />
+                */}
             </KeyboardAvoidingView>
+            <Slider
+                value={radius}
+                onValueChange={value => setRadius(value)}
+                minimumValue={1}
+                maximumValue={10}
+                step={1}
+                thumbTintColor='white'
+                minimumTrackTintColor='grey'
+                maximumTrackTintColor='grey'
+                style={{ width: 300 }}
+            />
+            <Text style={{ color: 'white' }}>Radius: {radius} km</Text>
+            <Slider
+                value={numOfPlaces}
+                onValueChange={value => setNumOfPlaces(value)}
+                minimumValue={1}
+                maximumValue={20}
+                step={1}
+                thumbTintColor='white'
+                minimumTrackTintColor='red'
+                maximumTrackTintColor='green'
+                style={{ width: 300 }}
+            />
+            <Text style={{ color: 'white', marginBottom: 20 }}>Number of places: {numOfPlaces}</Text>
             <Button
                 type='outline'
                 buttonStyle={{ borderColor: 'white', borderRadius: 10, width: 200 }}
