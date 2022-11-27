@@ -68,7 +68,7 @@ When the application is opened, the user must fill the following information in 
 * Enter the radius in kilometers
 * Enter the number of places
 
-<img src="https://github.com/kriihela/appro-generator/blob/main/readme-images/IMG_2798.jpg" alt="homescreen" width="200"/>
+<img src="https://github.com/kriihela/appro-generator/blob/main/readme-images/IMG_2798.jpg" alt="homescreen" width="400"/>
 
 The user can enter the address, or select the current location from the button on the right. After that, the distance the user is willing to travel is selected. Finally, the number of bars is selected. When the button on the bottom of the screen is pressed, the appro route will be generated.
 
@@ -76,11 +76,11 @@ The app uses the Google Maps API nearby search to find the bars. The limit of th
 
 If there are not enough places in the area, the user will be notified and the appro will not be generated.
 
-<img src="https://github.com/kriihela/appro-generator/blob/main/readme-images/IMG_2799.jpg" alt="Places" width="200"/>
+<img src="https://github.com/kriihela/appro-generator/blob/main/readme-images/IMG_2799.jpg" alt="Places" width="400"/>
 
 Next, the user sees a map where the bars and the user's current location are marked. The names of the places are listed below the map. When the name is pressed, more information will be displayed. When the user has arrived, they press the "I'm here" button. After this, the place will be removed from the list. When all places have been visited, the application congratulates the user for completing the appro.
 
-<img src="https://github.com/kriihela/appro-generator/blob/main/readme-images/IMG_2800.jpg" alt="Details" width="200"/>
+<img src="https://github.com/kriihela/appro-generator/blob/main/readme-images/IMG_2800.jpg" alt="Details" width="400"/>
 
 ## Deployment <a name = "deployment"></a>
 
