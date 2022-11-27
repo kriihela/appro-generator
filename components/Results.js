@@ -83,7 +83,6 @@ export default function Results({ route, navigation }) {
 
     } else {
         return (
-
             <View style={styles.container}>
                 <Header
                     containerStyle={{ backgroundColor: 'black', borderBottomColor: 'black' }}

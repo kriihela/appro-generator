@@ -1,10 +1,10 @@
 import * as Location from 'expo-location';
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, Image, Alert, KeyboardAvoidingView } from 'react-native';
+import { View, StyleSheet, Text, Image, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import { Input, Button, Header, Slider } from 'react-native-elements';
 import { GOOGLE_API_KEY } from '@env';
 
-export default function Details({ route, navigation }) {
+export default function Details({ navigation }) {
 
     // Details for the search
     const [userLocation, setUserLocation] = useState('');
@@ -19,6 +19,33 @@ export default function Details({ route, navigation }) {
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421,
     });
+
+    // Loading screen while fetching user location on startup
+    //
+    const [loading, setLoading] = useState(false);
+
+    const userLocationBoot = async () => {
+        setLoading(true);
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+            setErrorMsg('Permission to access location was denied');
+            return;
+        }
+        let location = await Location.getCurrentPositionAsync({});
+        setRegion({
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+        });
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        userLocationBoot();
+    }, []);
+    //
+    // End of loading screen
 
     // Fetch nearest bars
     const fetchPlaces = async () => {
@@ -43,7 +70,6 @@ export default function Details({ route, navigation }) {
             return;
         }
         let location = await Location.getCurrentPositionAsync({});
-        console.log('user location: ', location);
         setRegion({
             latitude: location.coords.latitude,
             longitude: location.coords.longitude,
@@ -70,54 +96,66 @@ export default function Details({ route, navigation }) {
             longitudeDelta: 0.0421,
         });
     };
-
-    useEffect(() => {
-        getUserLocation();
-    }, []);
-
-    return (
-
-        <View style={styles.container}>
-            <Header
-                containerStyle={{ borderBottomColor: 'black', backgroundColor: 'black' }}
-                rightComponent={{ icon: 'info', color: '#fff', onPress: () => navigation.navigate('Info') }}
-                centerComponent={{ text: 'APPRO GENERATOR', style: { color: '#fff' } }}
-            />
-            <Image style={styles.image} source={require('../assets/app-picture.png')} />
-            <View style={styles.inputContainer}>
-                <Input
-                    placeholder='Enter the address'
-                    inputStyle={{ color: 'white' }}
-                    keyboardAppearance='dark'
-                    value={userLocation}
-                    rightIcon={{
-                        type: 'material',
-                        name: 'clear',
-                        color: 'white',
-                        onPress: () => setUserLocation(''),
-                    }}
-                    onChangeText={value => setUserLocation(value)}
-                    onSubmitEditing={() => {
-                        getCoordinates();
-                    }}
-                />
-                <Button
-                    icon={{
-                        name: 'location-on',
-                        type: 'material',
-                        color: 'white'
-
-                    }}
-                    type='clear'
-                    onPress={() => {
-                        setUserLocation('');
-                        getUserLocation();
-                        getAddress();
-                    }}
-                />
+    
+    if (loading) {
+        return (
+            <View style={styles.bootContainer}>
+                <Image style={{
+                    height: 400,
+                    margin: 20,
+                    resizeMode: 'contain',
+                    alignContent: 'center',
+                    justifyContent: 'center',
+                    opacity: 0.9,
+                }} source={require('../assets/boot-screen.png')} />
+                <Text style={styles.text}>APPRO GENERATOR</Text>
+                <ActivityIndicator size="large" color="white" />
             </View>
-            <KeyboardAvoidingView style={styles.radiusAndPlacesContainer} behavior="padding" enabled>
-                {/*}
+        );
+
+    } else {
+        return (
+            <View style={styles.container}>
+                <Header
+                    containerStyle={{ borderBottomColor: 'black', backgroundColor: 'black' }}
+                    rightComponent={{ icon: 'info', color: '#fff', onPress: () => navigation.navigate('Info') }}
+                    centerComponent={{ text: 'APPRO GENERATOR', style: { color: '#fff' } }}
+                />
+                <Image style={styles.image} source={require('../assets/app-picture.png')} />
+                <View style={styles.inputContainer}>
+                    <Input
+                        placeholder='Enter the address'
+                        inputStyle={{ color: 'white' }}
+                        keyboardAppearance='dark'
+                        value={userLocation}
+                        rightIcon={{
+                            type: 'material',
+                            name: 'clear',
+                            color: 'white',
+                            onPress: () => setUserLocation(''),
+                        }}
+                        onChangeText={value => setUserLocation(value)}
+                        onSubmitEditing={() => {
+                            getCoordinates();
+                        }}
+                    />
+                    <Button
+                        icon={{
+                            name: 'location-on',
+                            type: 'material',
+                            color: 'white'
+
+                        }}
+                        type='clear'
+                        onPress={() => {
+                            setUserLocation('');
+                            getUserLocation();
+                            getAddress();
+                        }}
+                    />
+                </View>
+                <KeyboardAvoidingView style={styles.radiusAndPlacesContainer} behavior="padding" enabled>
+                    {/*}
                 <Input
                     placeholder='Enter radius in kilometers'
                     value={radius}
@@ -141,45 +179,46 @@ export default function Details({ route, navigation }) {
                     onChangeText={value => setNumOfPlaces(value)}
                 />
                 */}
-            </KeyboardAvoidingView>
-            <Slider
-                value={radius}
-                onValueChange={value => setRadius(value)}
-                minimumValue={1}
-                maximumValue={10}
-                step={1}
-                thumbTintColor='white'
-                minimumTrackTintColor='grey'
-                maximumTrackTintColor='grey'
-                style={{ width: 300 }}
-            />
-            <Text style={{ color: 'white' }}>Radius: {radius} km</Text>
-            <Slider
-                value={numOfPlaces}
-                onValueChange={value => setNumOfPlaces(value)}
-                minimumValue={1}
-                maximumValue={20}
-                step={1}
-                thumbTintColor='white'
-                minimumTrackTintColor='red'
-                maximumTrackTintColor='green'
-                style={{ width: 300 }}
-            />
-            <Text style={{ color: 'white', marginBottom: 20 }}>Number of places: {numOfPlaces}</Text>
-            <Button
-                type='outline'
-                buttonStyle={{ borderColor: 'white', borderRadius: 10, width: 200 }}
-                titleStyle={{ color: 'white' }}
-                icon={{
-                    name: 'arrow-right',
-                    type: 'font-awesome',
-                    color: 'white'
-                }}
-                containerStyle={{ marginBottom: 30 }}
-                onPress={search}
-            />
-        </View>
-    );
+                </KeyboardAvoidingView>
+                <Slider
+                    value={radius}
+                    onValueChange={value => setRadius(value)}
+                    minimumValue={1}
+                    maximumValue={10}
+                    step={1}
+                    thumbTintColor='white'
+                    minimumTrackTintColor='grey'
+                    maximumTrackTintColor='grey'
+                    style={{ width: 300 }}
+                />
+                <Text style={{ color: 'white' }}>Radius: {radius} km</Text>
+                <Slider
+                    value={numOfPlaces}
+                    onValueChange={value => setNumOfPlaces(value)}
+                    minimumValue={1}
+                    maximumValue={20}
+                    step={1}
+                    thumbTintColor='white'
+                    minimumTrackTintColor='red'
+                    maximumTrackTintColor='green'
+                    style={{ width: 300 }}
+                />
+                <Text style={{ color: 'white', marginBottom: 20 }}>Number of places: {numOfPlaces}</Text>
+                <Button
+                    type='outline'
+                    buttonStyle={{ borderColor: 'white', borderRadius: 10, width: 200 }}
+                    titleStyle={{ color: 'white' }}
+                    icon={{
+                        name: 'arrow-right',
+                        type: 'font-awesome',
+                        color: 'white'
+                    }}
+                    containerStyle={{ marginBottom: 30 }}
+                    onPress={search}
+                />
+            </View>
+        );
+    }
 }
 
 const styles = StyleSheet.create({
@@ -218,9 +257,16 @@ const styles = StyleSheet.create({
         flexWrap: 'nowrap',
         marginHorizontal: 100,
     },
-    sliderText: {
+    text: {
         color: 'white',
-        fontSize: 10,
-        marginBottom: 10,
+        fontSize: 20,
+        fontWeight: 'bold',
+        margin: 20,
+    },
+    bootContainer: {
+        flex: 1,
+        backgroundColor: 'black',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 });

@@ -13,7 +13,7 @@ export default function Info({ navigation }) {
             <Text> </Text>
             <Text style={styles.text}>The purpose of the application is to make life easier for a thirsty student.</Text>
             <Text> </Text>
-            <Text style={styles.text}>The application uses the Google Places API to find the nearest bars.</Text>
+            <Text style={styles.text}>The application uses Google Places API to find the nearest bars and React Native & Expo frameworks. Images are created by using Dall-E.</Text>
             <Text> </Text>
             <Text> </Text>
             <Text style={styles.text}>The application was created by:</Text>
