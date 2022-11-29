@@ -151,9 +151,9 @@ export default function Details({ navigation }) {
 
                         }}
                         type='clear'
-                        onPress={() => {
-                            getUserLocation();
-                            getAddress();
+                        onPress={ async () => {
+                           await getUserLocation();
+                           await getAddress();
                         }}
                     />
                 </View>
