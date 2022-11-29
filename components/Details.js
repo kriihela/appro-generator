@@ -89,6 +89,12 @@ export default function Details({ navigation }) {
     const getCoordinates = async () => {
         const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${userLocation}&key=${GOOGLE_API_KEY}`);
         const json = await response.json();
+        return json;
+    };
+    
+    // handle coordinates from input
+    const handleCoordinates = async () => {
+        const json = await getCoordinates();
         setRegion({
             latitude: json.results[0].geometry.location.lat,
             longitude: json.results[0].geometry.location.lng,
@@ -135,9 +141,7 @@ export default function Details({ navigation }) {
                             onPress: () => setUserLocation(''),
                         }}
                         onChangeText={value => setUserLocation(value)}
-                        onSubmitEditing={() => {
-                            getCoordinates();
-                        }}
+                        onSubmitEditing={handleCoordinates}
                     />
                     <Button
                         icon={{
@@ -148,7 +152,6 @@ export default function Details({ navigation }) {
                         }}
                         type='clear'
                         onPress={() => {
-                            setUserLocation('');
                             getUserLocation();
                             getAddress();
                         }}

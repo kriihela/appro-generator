@@ -11,6 +11,12 @@ export default function Results({ route, navigation }) {
     const [placesNumber, setPlacesNumber] = useState(places.length);
     const [placesLeft, setPlacesLeft] = useState(numOfPlaces);
     const [filteredPlaces, setFilteredPlaces] = useState([]);
+    const [region, setRegion] = useState({
+        latitude: 60.1708,
+        longitude: 24.9375,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+    });
     const [modalVisible, setModalVisible] = useState(false);
     const [item, setItem] = useState({});
     const showModal = (item) => {
@@ -28,6 +34,12 @@ export default function Results({ route, navigation }) {
                 places.splice(randomIndex, 1);
             }
             setFilteredPlaces(filteredPlaces);
+            setRegion({
+                latitude: filteredPlaces[0].geometry.location.lat,
+                longitude: filteredPlaces[0].geometry.location.lng,
+                latitudeDelta: 0.0922,
+                longitudeDelta: 0.0421,
+            });
         }
         filterPlaces();
     }, []);
@@ -92,11 +104,12 @@ export default function Results({ route, navigation }) {
                 <MapView
                     style={styles.map}
                     showsUserLocation={true}
+                    showsMyLocationButton={true}
                     region={{
-                        latitude: 60.1708,
-                        longitude: 24.9375,
-                        latitudeDelta: 0.0922,
-                        longitudeDelta: 0.0421,
+                        latitude: region.latitude,
+                        longitude: region.longitude,
+                        latitudeDelta: region.latitudeDelta,
+                        longitudeDelta: region.longitudeDelta,
                     }}
                 >
                     {filteredPlaces.map((place, index) => (
