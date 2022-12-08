@@ -49,7 +49,8 @@ export default function Details({ navigation }) {
 
     // Fetch nearest bars
     const fetchPlaces = async () => {
-        const response = await fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${region.latitude},${region.longitude}&radius=${radius * 1000}&type=bar&key=${GOOGLE_API_KEY}`)
+        const coords = await getCoordinates();
+        const response = await fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${coords.results[0].geometry.location.lat},${coords.results[0].geometry.location.lng}&radius=${radius * 1000}&type=bar&key=${GOOGLE_API_KEY}`)
         const data = await response.json();
         const places = data.results;
         return places;
@@ -91,18 +92,7 @@ export default function Details({ navigation }) {
         const json = await response.json();
         return json;
     };
-    
-    // handle coordinates from input
-    const handleCoordinates = async () => {
-        const json = await getCoordinates();
-        setRegion({
-            latitude: json.results[0].geometry.location.lat,
-            longitude: json.results[0].geometry.location.lng,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-        });
-    };
-    
+
     if (loading) {
         return (
             <View style={styles.bootContainer}>
@@ -141,7 +131,6 @@ export default function Details({ navigation }) {
                             onPress: () => setUserLocation(''),
                         }}
                         onChangeText={value => setUserLocation(value)}
-                        onSubmitEditing={handleCoordinates}
                     />
                     <Button
                         icon={{
@@ -151,37 +140,13 @@ export default function Details({ navigation }) {
 
                         }}
                         type='clear'
-                        onPress={ async () => {
-                           await getUserLocation();
-                           await getAddress();
+                        onPress={async () => {
+                            await getUserLocation();
+                            await getAddress();
                         }}
                     />
                 </View>
                 <KeyboardAvoidingView style={styles.radiusAndPlacesContainer} behavior="padding" enabled>
-                    {/*}
-                <Input
-                    placeholder='Enter radius in kilometers'
-                    value={radius}
-                    clearButtonMode='always'
-                    keyboardType='number-pad'
-                    returnKeyType='done'
-                    keyboardAppearance='dark'
-                    inputStyle={{ color: 'white' }}
-                    clearTextOnFocus={true}
-                    onChangeText={value => setRadius(value * 1000)}
-                />
-                <Input
-                    placeholder='Number of places'
-                    value={numOfPlaces}
-                    clearButtonMode='always'
-                    clearTextOnFocus={true}
-                    keyboardType='number-pad'
-                    inputStyle={{ color: 'white' }}
-                    keyboardAppearance='dark'
-                    returnKeyType='done'
-                    onChangeText={value => setNumOfPlaces(value)}
-                />
-                */}
                 </KeyboardAvoidingView>
                 <Slider
                     value={radius}
