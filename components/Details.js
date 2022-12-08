@@ -1,6 +1,6 @@
 import * as Location from 'expo-location';
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, Image, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, Text, Image, KeyboardAvoidingView, ActivityIndicator, Alert } from 'react-native';
 import { Input, Button, Header, Slider } from 'react-native-elements';
 import { GOOGLE_API_KEY } from '@env';
 
@@ -11,6 +11,7 @@ export default function Details({ navigation }) {
     const [numOfPlaces, setNumOfPlaces] = useState(1);
     const [radius, setRadius] = useState(1);
     const [places, setPlaces] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     // Details for the map
     const [region, setRegion] = useState({
@@ -21,9 +22,6 @@ export default function Details({ navigation }) {
     });
 
     // Loading screen while fetching user location on startup
-    //
-    const [loading, setLoading] = useState(false);
-
     const userLocationBoot = async () => {
         setLoading(true);
         let { status } = await Location.requestForegroundPermissionsAsync();
@@ -38,30 +36,39 @@ export default function Details({ navigation }) {
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421,
         });
+        const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.coords.latitude},${location.coords.longitude}&key=${GOOGLE_API_KEY}`);
+        const json = await response.json();
+        setUserLocation(json.results[0].formatted_address);
         setLoading(false);
     };
 
     useEffect(() => {
         userLocationBoot();
     }, []);
-    //
-    // End of loading screen
 
     // Fetch nearest bars
     const fetchPlaces = async () => {
-        const coords = await getCoordinates();
-        const response = await fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${coords.results[0].geometry.location.lat},${coords.results[0].geometry.location.lng}&radius=${radius * 1000}&type=bar&key=${GOOGLE_API_KEY}`)
-        const data = await response.json();
-        const places = data.results;
-        return places;
-    }
+        try {
+            const coords = await getCoordinates();
+            const response = await fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${coords.results[0].geometry.location.lat},${coords.results[0].geometry.location.lng}&radius=${radius * 1000}&type=bar&key=${GOOGLE_API_KEY}`)
+            const data = await response.json();
+            const places = data.results;
+            return places;
+        } catch (err) {
+            console.log(err);
+        }
+    };
 
     // when user clicks the button, fetch places and set them to the state and navigate to the Results screen
     const search = async () => {
-        const places = await fetchPlaces();
-        setPlaces(places);
-        navigation.navigate('Results', { places: places, numOfPlaces: numOfPlaces });
-    }
+        try {
+            const places = await fetchPlaces();
+            setPlaces(places);
+            navigation.navigate('Results', { places: places, numOfPlaces: numOfPlaces });
+        } catch (err) {
+            console.log(err);
+        }
+    };
 
     // Get user location
     const getUserLocation = async () => {
@@ -70,6 +77,7 @@ export default function Details({ navigation }) {
             setErrorMsg('Permission to access location was denied');
             return;
         }
+        setUserLocation('Getting current location...');
         let location = await Location.getCurrentPositionAsync({});
         setRegion({
             latitude: location.coords.latitude,
@@ -77,20 +85,20 @@ export default function Details({ navigation }) {
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421,
         });
-    };
-
-    // use google places api to get the address of the current location
-    const getAddress = async () => {
-        const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${region.latitude},${region.longitude}&key=${GOOGLE_API_KEY}`);
+        const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.coords.latitude},${location.coords.longitude}&key=${GOOGLE_API_KEY}`);
         const json = await response.json();
         setUserLocation(json.results[0].formatted_address);
     };
 
     // get coordinates from input
     const getCoordinates = async () => {
-        const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${userLocation}&key=${GOOGLE_API_KEY}`);
-        const json = await response.json();
-        return json;
+        try {
+            const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${userLocation}&key=${GOOGLE_API_KEY}`);
+            const json = await response.json();
+            return json;
+        } catch (err) {
+            console.log(err);
+        }
     };
 
     if (loading) {
@@ -108,7 +116,6 @@ export default function Details({ navigation }) {
                 <ActivityIndicator size="large" color="white" />
             </View>
         );
-
     } else {
         return (
             <View style={styles.container}>
@@ -140,10 +147,7 @@ export default function Details({ navigation }) {
 
                         }}
                         type='clear'
-                        onPress={async () => {
-                            await getUserLocation();
-                            await getAddress();
-                        }}
+                        onPress={getUserLocation}
                     />
                 </View>
                 <KeyboardAvoidingView style={styles.radiusAndPlacesContainer} behavior="padding" enabled>
