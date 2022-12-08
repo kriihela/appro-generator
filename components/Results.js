@@ -3,6 +3,7 @@ import { View, StyleSheet, Text, FlatList, Modal, Image } from 'react-native';
 import { Button, Icon, ListItem, Header } from 'react-native-elements';
 import { GOOGLE_API_KEY } from '@env';
 import MapView, { Marker } from 'react-native-maps';
+import { shuffle } from 'lodash';
 
 export default function Results({ route, navigation }) {
 
@@ -27,22 +28,17 @@ export default function Results({ route, navigation }) {
     // randomize the places and only show the number of places the user wants to see
     useEffect(() => {
         const filterPlaces = () => {
-            let filteredPlaces = [];
-            for (let i = 0; i < numOfPlaces; i++) {
-                let randomIndex = Math.floor(Math.random() * places.length);
-                filteredPlaces.push(places[randomIndex]);
-                places.splice(randomIndex, 1);
-            }
-            setFilteredPlaces(filteredPlaces);
-            setRegion({
-                latitude: filteredPlaces[0].geometry.location.lat,
-                longitude: filteredPlaces[0].geometry.location.lng,
-                latitudeDelta: 0.0922,
-                longitudeDelta: 0.0421,
-            });
+          let selectedPlaces = shuffle(places).slice(0, numOfPlaces);
+          setFilteredPlaces(selectedPlaces);
+          setRegion({
+            latitude: selectedPlaces[0].geometry.location.lat,
+            longitude: selectedPlaces[0].geometry.location.lng,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          });
         }
         filterPlaces();
-    }, []);
+      }, []);
 
     // delete a place from the list
     const deletePlace = (item) => {
