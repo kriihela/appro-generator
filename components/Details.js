@@ -1,8 +1,9 @@
 import * as Location from 'expo-location';
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, Image, KeyboardAvoidingView, ActivityIndicator, Alert } from 'react-native';
+import { View, StyleSheet, Text, Image, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import { Input, Button, Header, Slider } from 'react-native-elements';
 import { GOOGLE_API_KEY } from '@env';
+import MapView from 'react-native-maps';
 
 export default function Details({ navigation }) {
 
@@ -124,7 +125,17 @@ export default function Details({ navigation }) {
                     rightComponent={{ icon: 'info', color: '#fff', onPress: () => navigation.navigate('Info') }}
                     centerComponent={{ text: 'APPRO GENERATOR', style: { color: '#fff' } }}
                 />
-                <Image style={styles.image} source={require('../assets/app-picture.png')} />
+                <MapView
+                    style={styles.map}
+                    showsUserLocation={true}
+                    showsMyLocationButton={true}
+                    region={{
+                        latitude: region.latitude,
+                        longitude: region.longitude,
+                        latitudeDelta: region.latitudeDelta,
+                        longitudeDelta: region.longitudeDelta,
+                    }}
+                />
                 <View style={styles.inputContainer}>
                     <Input
                         placeholder='Enter the address'
@@ -199,11 +210,12 @@ const styles = StyleSheet.create({
         backgroundColor: 'black',
         alignItems: 'center',
     },
-    image: {
+    map: {
         flex: 1,
         width: '100%',
-        marginBottom: 20,
+        height: '100%',
         borderRadius: 20,
+        marginBottom: 10,
     },
     title: {
         fontSize: 20,
