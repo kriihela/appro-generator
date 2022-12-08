@@ -28,17 +28,17 @@ export default function Results({ route, navigation }) {
     // randomize the places and only show the number of places the user wants to see
     useEffect(() => {
         const filterPlaces = () => {
-          let selectedPlaces = shuffle(places).slice(0, numOfPlaces);
-          setFilteredPlaces(selectedPlaces);
-          setRegion({
-            latitude: selectedPlaces[0].geometry.location.lat,
-            longitude: selectedPlaces[0].geometry.location.lng,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          });
+            let selectedPlaces = shuffle(places).slice(0, numOfPlaces);
+            setFilteredPlaces(selectedPlaces);
+            setRegion({
+                latitude: selectedPlaces[0].geometry.location.lat,
+                longitude: selectedPlaces[0].geometry.location.lng,
+                latitudeDelta: 0.0922,
+                longitudeDelta: 0.0421,
+            });
         }
         filterPlaces();
-      }, []);
+    }, []);
 
     // delete a place from the list
     const deletePlace = (item) => {
@@ -68,7 +68,7 @@ export default function Results({ route, navigation }) {
             </View>
         );
 
-    // when every place is deleted, show a message
+        // when every place is deleted, show a message
     } else if (placesLeft === 0) {
         return (
             <View style={styles.container}>
@@ -122,10 +122,11 @@ export default function Results({ route, navigation }) {
                 </MapView>
                 <FlatList
                     style={styles.list}
-                    keyExtractor={item => item.id}
+                    keyExtractor={item => item.place_id}
                     data={filteredPlaces}
                     renderItem={({ item }) =>
                         <ListItem
+                            key={item.place_id}
                             bottomDivider
                             containerStyle={styles.listItem}
                             onPress={() => showModal(item)}
