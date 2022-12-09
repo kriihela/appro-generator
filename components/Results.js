@@ -4,6 +4,9 @@ import { Button, Icon, ListItem, Header } from 'react-native-elements';
 import { GOOGLE_API_KEY } from '@env';
 import MapView, { Marker } from 'react-native-maps';
 import { shuffle } from 'lodash';
+import * as SQLite from 'expo-sqlite';
+
+const db = SQLite.openDatabase('favorite_places.db');
 
 export default function Results({ route, navigation }) {
 
@@ -12,6 +15,7 @@ export default function Results({ route, navigation }) {
     const [placesNumber, setPlacesNumber] = useState(places.length);
     const [placesLeft, setPlacesLeft] = useState(numOfPlaces);
     const [filteredPlaces, setFilteredPlaces] = useState([]);
+    const [favoritePlaces, setFavoritePlaces] = useState([]);
     const [region, setRegion] = useState({
         latitude: 60.1708,
         longitude: 24.9375,
@@ -27,6 +31,7 @@ export default function Results({ route, navigation }) {
 
     // randomize the places and only show the number of places the user wants to see
     useEffect(() => {
+        getFavorites();
         const filterPlaces = () => {
             let selectedPlaces = shuffle(places).slice(0, numOfPlaces);
             setFilteredPlaces(selectedPlaces);
@@ -44,7 +49,30 @@ export default function Results({ route, navigation }) {
     const deletePlace = (item) => {
         setFilteredPlaces(filteredPlaces.filter(place => place.place_id !== item.place_id));
         setPlacesLeft(placesLeft - 1);
+        console.log(item);
     }
+
+    // get the favorites from the database
+    const getFavorites = () => {
+        db.transaction(tx => {
+            tx.executeSql('select * from favorites;', [], (_, { rows }) =>
+                setFavoritePlaces(rows._array)
+            );
+        });
+    }
+
+    // add a place to the favorites
+    const addToFavorites = (item) => {
+        db.transaction(tx => {
+            tx.executeSql(
+                'insert into favorites (name, address) values (?, ?);',
+                [item.name, item.vicinity],
+                (_, { insertId }) => {
+                    setFavoritePlaces([...favoritePlaces, { id: insertId, name: item.name, address: item.vicinity }]);
+                }
+            );
+        });
+    };
 
     // if there are less places than the user wants, show a message
     if (placesNumber < placesLeft) {
@@ -68,7 +96,7 @@ export default function Results({ route, navigation }) {
             </View>
         );
 
-        // when every place is deleted, show a message
+    // when every place is deleted, show a message
     } else if (placesLeft === 0) {
         return (
             <View style={styles.container}>
@@ -131,6 +159,12 @@ export default function Results({ route, navigation }) {
                             containerStyle={styles.listItem}
                             onPress={() => showModal(item)}
                         >
+                            <Icon
+                                name="favorite"
+                                size={30}
+                                color={favoritePlaces.find(favorite => favorite.name === item.name) ? 'red' : 'grey'}
+                                onPress={() => addToFavorites(item)}
+                            />
                             <ListItem.Content>
                                 <Text>{item.name}</Text>
                             </ListItem.Content>
