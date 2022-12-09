@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, FlatList, StyleSheet } from 'react-native';
+import { View, FlatList, StyleSheet, Text } from 'react-native';
 import { ListItem, Header, Icon } from 'react-native-elements';
 import * as SQLite from 'expo-sqlite';
 
 const db = SQLite.openDatabase('favorite_places.db');
 
-export default function Favorites({ route, navigation }) {
+export default function Favorites({ navigation }) {
 
   const [favorites, setFavorites] = useState([]);
 
@@ -39,34 +39,50 @@ export default function Favorites({ route, navigation }) {
     });
   }
 
-  return (
-    <View style={styles.container}>
-      <Header
-        containerStyle={{ backgroundColor: 'black', borderBottomColor: 'black' }}
-        leftComponent={<Icon name="arrow-back" color="white" onPress={() => navigation.navigate('Details')} />}
-        centerComponent={{ text: 'Favorites', style: { color: 'white', fontSize: 20 } }}
-      />
-      <FlatList
-        style={styles.list}
-        keyExtractor={item => item.id.toString()}
-        data={favorites}
-        renderItem={({ item }) => (
-          <ListItem bottomDivider style={styles.listItem}>
-            <ListItem.Content>
-              <ListItem.Title>{item.name}</ListItem.Title>
-              <ListItem.Subtitle>{item.address}</ListItem.Subtitle>
-            </ListItem.Content>
-            <Icon
-              name="delete"
-              size={30}
-              color="red"
-              onPress={() => deletePlace(item)}
-            />
-          </ListItem>
-        )}
-      />
-    </View>
-  );
+  if (favorites.length === 0) {
+
+    return (
+      <View style={{backgroundColor: "black", flex: 1}}>
+        <Header
+          containerStyle={{ backgroundColor: 'black', borderBottomColor: 'black' }}
+          leftComponent={<Icon name="arrow-back" color="white" onPress={() => navigation.navigate('Details')} />}
+          centerComponent={{ text: 'Favorites', style: { color: 'white', fontSize: 20 } }}
+        />
+        <Text style={{ color: 'white', alignSelf: 'center', margin: 20 }}>No favorites yet</Text>
+      </View>
+    );
+
+  } else {
+
+    return (
+      <View style={styles.container}>
+        <Header
+          containerStyle={{ backgroundColor: 'black', borderBottomColor: 'black' }}
+          leftComponent={<Icon name="arrow-back" color="white" onPress={() => navigation.navigate('Details')} />}
+          centerComponent={{ text: 'Favorites', style: { color: 'white', fontSize: 20 } }}
+        />
+        <FlatList
+          style={styles.list}
+          keyExtractor={item => item.id.toString()}
+          data={favorites}
+          renderItem={({ item }) => (
+            <ListItem bottomDivider style={styles.listItem}>
+              <ListItem.Content>
+                <ListItem.Title>{item.name}</ListItem.Title>
+                <ListItem.Subtitle>{item.address}</ListItem.Subtitle>
+              </ListItem.Content>
+              <Icon
+                name="delete"
+                size={30}
+                color="red"
+                onPress={() => deletePlace(item)}
+              />
+            </ListItem>
+          )}
+        />
+      </View>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
