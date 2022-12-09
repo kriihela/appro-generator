@@ -1,6 +1,6 @@
 import * as Location from 'expo-location';
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, Image, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, Text, Image, KeyboardAvoidingView, ActivityIndicator, Modal } from 'react-native';
 import { Input, Button, Header, Slider } from 'react-native-elements';
 import { GOOGLE_API_KEY } from '@env';
 import MapView from 'react-native-maps';
@@ -124,6 +124,7 @@ export default function Details({ navigation }) {
                     containerStyle={{ borderBottomColor: 'black', backgroundColor: 'black' }}
                     rightComponent={{ icon: 'info', color: '#fff', onPress: () => navigation.navigate('Info') }}
                     centerComponent={{ text: 'APPRO GENERATOR', style: { color: '#fff' } }}
+                    leftComponent={{ icon: 'favorite', color: '#fff', onPress: () => navigation.navigate('Favorites')}}
                 />
                 <MapView
                     style={styles.map}
@@ -139,6 +140,7 @@ export default function Details({ navigation }) {
                 <View style={styles.inputContainer}>
                     <Input
                         placeholder='Enter the address'
+                        editable={userLocation === 'Getting current location...' ? false : true}
                         inputStyle={{ color: 'white' }}
                         keyboardAppearance='dark'
                         value={userLocation}
